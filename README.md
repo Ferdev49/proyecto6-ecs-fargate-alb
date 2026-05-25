@@ -42,19 +42,19 @@ Cuando ejecutes `terraform apply`:
               │                                │
     ┌─────────────────────────────────────────────────┐
     │                                                 │
-    │  PUBLIC SUBNETS (ALB)                          │
-    │  ├─ 10.0.1.0/24 (us-east-1a)                   │
-    │  └─ 10.0.2.0/24 (us-east-1b)                   │
+    │  PUBLIC SUBNETS (ALB)                           │
+    │  ├─ 10.0.1.0/24 (us-east-1a)                    │
+    │  └─ 10.0.2.0/24 (us-east-1b)                    │
     │                                                 │
-    │  PRIVATE SUBNETS (ECS Tasks)                   │
-    │  ├─ 10.0.10.0/24 (us-east-1a)                  │
-    │  │   └─ [ECS Task 1] (nginx)                   │
-    │  └─ 10.0.11.0/24 (us-east-1b)                  │
-    │      └─ [ECS Task 2] (nginx)                   │
+    │  PRIVATE SUBNETS (ECS Tasks)                    │
+    │  ├─ 10.0.10.0/24 (us-east-1a)                   │
+    │  │   └─ [ECS Task 1] (nginx)                    │
+    │  └─ 10.0.11.0/24 (us-east-1b)                   │
+    │      └─ [ECS Task 2] (nginx)                    │
     │                                                 │
-    │  [ECS Cluster] ← Orquesta tareas               │
+    │  [ECS Cluster] ← Orquesta tareas                │
     │  [Auto Scaling] ← Escala 2-4 tareas             │
-    │  [CloudWatch] ← Logs de tareas                 │
+    │  [CloudWatch] ← Logs de tareas                  │
     │                                                 │
     └─────────────────────────────────────────────────┘
 ```
