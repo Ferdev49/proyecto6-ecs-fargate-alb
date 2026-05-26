@@ -30,35 +30,50 @@ Cuando ejecutes `terraform apply`:
 ---
 
 ## 🏗️ Arquitectura
+```
+[ Internet (0.0.0.0/0) ]
+          │
+          ▼
+   [ Internet Gateway ]
+          │
+          ▼
+┌───────────────────────────────────────────────────────────────────────────────┐
+│ VPC (10.0.0.0/16)                                                             │
+│                                                                               │
+│  ┌─────────────────────────────────────────────────────────────────────────┐  │
+│  │ PUBLIC SUBNETS (ALB & NAT)                                              │  │
+│  │                                                                         │  │
+│  │   us-east-1a (10.0.1.0/24)             us-east-1b (10.0.2.0/24)         │  │
+│  │   ┌────────────────────────┐           ┌────────────────────────┐       │  │
+│  │   │ [ NAT Gateway ] <──────┼───────────┼───────────┐            │       │  │
+│  │   │                        │           │           │            │       │  │
+│  │   │ [ Application Balancer ]<─┐     ┌─>│ [ Application Balancer ]       │  │
+│  │   │   (Puerto 80 / Publico)│  │     │  │   (Puerto 80 / Publico)│       │  │
+│  │   └───────────┬────────────┘  │     │  └───────────┬────────────┘       │  │
+│  └───────────────┼───────────────┼─────┼──────────────┼────────────────────┘  │
+│                  │               │     │              │                       │
+│                  │ (Tráfico HTTP)│     │              │ (Tráfico HTTP)        │
+│                  ▼               │     │              ▼                       │
+│  ┌───────────────────────────────┼─────┼───────────────────────────────────┐  │
+│  │ PRIVATE SUBNETS (ECS Tasks & Auto Scaling)                              │  │
+│  │                                                                         │  │
+│  │   [ ECS Cluster ] ── Orquesta tareas (Fargate)                          │  │
+│  │   [ Auto Scaling ] ── Escala 2-4 tareas según CPU/Memoria               │  │
+│  │   [ Security Group ] ── Permite tráfico INBOUND *solo* desde el ALB     │  │
+│  │                                                                         │  │
+│  │   us-east-1a (10.0.10.0/24)            us-east-1b (10.0.11.0/24)        │  │
+│  │   ┌────────────────────────┐           ┌────────────────────────┐       │  │
+│  │   │ [ ECS Task 1 ] (nginx) │           │ [ ECS Task 2 ] (nginx) │       │  │
+│  │   │                        │           │                        │       │  │
+│  │   │   Outbound ───>────────┼───────────┼───────────> Outbound   │       │  │
+│  │   └────────────────────────┘           └────────────────────────┘       │  │
+│  └─────────────────────────────────────────────────────────────────────────┘  │
+└───────────────────────────────────────────────────────────────────────────────┘
+          ▲                                                 │
+          │ (Pull imagen NGINX)                             ▼ (Logs de tareas)
+   [ Amazon ECR ]                                    [ CloudWatch Logs ]
 
 ```
-                        Internet (0.0.0.0/0)
-                               ↓
-                    [Application Load Balancer]
-                      (puerto 80, públicas)
-                               ↓
-              ┌────────────────────────────────┐
-              │   VPC (10.0.0.0/16)            │
-              │                                │
-    ┌─────────────────────────────────────────────────┐
-    │                                                 │
-    │  PUBLIC SUBNETS (ALB)                           │
-    │  ├─ 10.0.1.0/24 (us-east-1a)                    │
-    │  └─ 10.0.2.0/24 (us-east-1b)                    │
-    │                                                 │
-    │  PRIVATE SUBNETS (ECS Tasks)                    │
-    │  ├─ 10.0.10.0/24 (us-east-1a)                   │
-    │  │   └─ [ECS Task 1] (nginx)                    │
-    │  └─ 10.0.11.0/24 (us-east-1b)                   │
-    │      └─ [ECS Task 2] (nginx)                    │
-    │                                                 │
-    │  [ECS Cluster] ← Orquesta tareas                │
-    │  [Auto Scaling] ← Escala 2-4 tareas             │
-    │  [CloudWatch] ← Logs de tareas                  │
-    │                                                 │
-    └─────────────────────────────────────────────────┘
-```
-
 ---
 
 ## 📦 Estructura del Proyecto
